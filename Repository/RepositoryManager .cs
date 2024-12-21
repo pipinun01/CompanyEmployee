@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class RepositoryManager : IRepositoryManager
+    public sealed class RepositoryManager : IRepositoryManager
     {
         private readonly RepositoryContext _context;
         private readonly Lazy<ICompanyRepository> _CompanyRepository;
         private readonly Lazy<IEmployeeRepository> _EmployeeRepository;
 
-        public RepositoryManager(RepositoryContext context, Lazy<ICompanyRepository> companyRepository, Lazy<IEmployeeRepository> employeeRepository)
+        public RepositoryManager(RepositoryContext context)
         {
             _context = context;
             _CompanyRepository = new Lazy<ICompanyRepository>(() => new CompanyRepository(_context));

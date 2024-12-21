@@ -1,3 +1,4 @@
+using Contracts;
 using CreateWebAPI.Extensions;
 using LoggerService;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -19,21 +20,21 @@ namespace CreateWebAPI
             builder.Services.ConfigureRepositoryManager();
             builder.Services.ConfigureServiceManager();
             builder.Services.ConfigureSqlContext(builder.Configuration);
-            builder.Services.AddControllers();
+            builder.Services.ConfigureAutoMapper();
+            builder.Services.AddControllers().AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
+            var logger = app.Services.GetRequiredService<ILoggerManager>();
+            app.ConfigureExceptionHandler(logger);
+
+            if (app.Environment.IsProduction())
             {
                 app.UseHsts();
             }
                 // Configure the HTTP request pipeline.
 
-                app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
