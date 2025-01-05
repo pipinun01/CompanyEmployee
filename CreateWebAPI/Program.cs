@@ -2,6 +2,7 @@ using Contracts;
 using CreateWebAPI.Extensions;
 using LoggerService;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 namespace CreateWebAPI
 {
@@ -21,6 +22,11 @@ namespace CreateWebAPI
             builder.Services.ConfigureServiceManager();
             builder.Services.ConfigureSqlContext(builder.Configuration);
             builder.Services.ConfigureAutoMapper();
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
             builder.Services.AddControllers().AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
             var app = builder.Build();

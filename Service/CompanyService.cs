@@ -35,5 +35,43 @@ namespace Service
             var companyDto = _mapper.Map<CompanyDto>(company);
             return companyDto;
         }
+        public CompanyDto CreateCompany(CompanyForCreationDto company)
+        {
+            var companyEntity = _mapper.Map<Company>(company);
+            _repositoryManager.CompanyRepository.CreateCompany(companyEntity);
+            _repositoryManager.Save();
+            var companyToReturn = _mapper.Map<CompanyDto>(companyEntity);
+            return companyToReturn;
+        }
+
+        public IEnumerable<CompanyDto> GetByIds(IEnumerable<Guid> ids, bool trackChanges)
+        {
+            if(ids is null)
+            {
+                throw new IdParametersBadRequestException();
+            }
+            var companyEntity = _repositoryManager.CompanyRepository.GetByIds(ids, trackChanges);
+            if(ids.Count() != companyEntity.Count())
+            {
+                throw new CollectionByIdsBadRequestException();
+            }
+            var companyToReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntity);
+            return companyToReturn;
+        }
+        public (ICollection<CompanyDto> companies, string ids) CreateCompanyCollection(IEnumerable<CompanyForCreationDto> companyCollaction)
+        {
+            if (companyCollaction is null)
+                throw new CompanyCollectionBadRequest();
+            var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollaction);
+            foreach(var company in companyEntities)
+            {
+                _repositoryManager.CompanyRepository.CreateCompany(company);
+            }
+            _repositoryManager.Save();
+
+            var companyCollectionToReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntities);
+            var ids = string.Join(",", companyCollectionToReturn.Select(c=>c.id));
+            return(companies: companyCollectionToReturn.ToList(),  ids);
+        }
     }
 }
