@@ -58,5 +58,19 @@ namespace CompanyEmployees.Presentation.Controllers
             var result = _serviceManager.CompanyService.CreateCompanyCollection(companyCollection);
             return CreatedAtRoute("CompanyCollection", new { result.ids }, result.companies);
         }
+        [HttpDelete("{comapnyId:guid}")]
+        public IActionResult DeleteCompany(Guid comapnyId)
+        {
+            _serviceManager.CompanyService.DeleteCompany(comapnyId, false);
+            return NoContent();
+        }
+        [HttpPut("{id:guid}")]
+        public IActionResult UpdateCompany(Guid id, [FromBody] CompanyForUpdateDto company)
+        {
+            if(company is null)
+                return BadRequest("CompanyForUpdateDto object is null");
+            _serviceManager.CompanyService.UpdateCompany(id, company, true);
+            return NoContent();
+        }
     }
 }
