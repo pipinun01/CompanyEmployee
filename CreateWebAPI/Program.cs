@@ -33,15 +33,8 @@ namespace CreateWebAPI
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
-            });
-            // builder.Services.AddControllers(config =>
-            // {
-            //     config.RespectBrowserAcceptHeader = true;
-            //     config.ReturnHttpNotAcceptable = true;
-            //     config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
 
-            // }).AddXmlDataContractSerializerFormatters()
-            //.AddCustomCSVFormatter().AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+            });
             builder.Services.AddControllers(config =>
             {
                 config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());

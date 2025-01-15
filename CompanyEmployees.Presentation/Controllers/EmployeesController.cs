@@ -31,6 +31,7 @@ namespace CompanyEmployees.Presentation.Controllers
             var employee = serviceManager.EmployeeService.GetEmployee(companyid, id, false);
             return Ok(employee);
         }
+
         [HttpPost]
         public IActionResult CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employeeForCreation)
         {
@@ -38,9 +39,13 @@ namespace CompanyEmployees.Presentation.Controllers
             {
                 return BadRequest("EmployeeForCreationDto object is null");
             }
+            if(!ModelState.IsValid) 
+                return UnprocessableEntity(ModelState);
+
             var employeeToReturn = serviceManager.EmployeeService.CreateEmployeeForCompany(companyId, employeeForCreation, false);
             return CreatedAtRoute("GetEmployeeForCompany", new { companyId, id = employeeToReturn.Id }, employeeToReturn);
         }
+
         [HttpDelete("{id:guid}")]
         public IActionResult DeleteEmployeeForCompany(Guid companyid, Guid id)
         {
@@ -52,6 +57,9 @@ namespace CompanyEmployees.Presentation.Controllers
         {
             if (employeeUpdate is null)
                 return BadRequest("EmployeeForUpdateDto object is null");
+            if (!ModelState.IsValid)
+                return UnprocessableEntity(ModelState);
+
             serviceManager.EmployeeService.UpdateEmployeeForCompany(companyId,id,employeeUpdate, false, true);
             return NoContent();
         }
@@ -61,7 +69,12 @@ namespace CompanyEmployees.Presentation.Controllers
             if(patchDoc is null)
                 return BadRequest("patchDoc object sent from client is null.");
             var result = serviceManager.EmployeeService.GetEmployeeForPatch(companyId, id, false, true);
-            patchDoc.ApplyTo(result.employeeToPatch);
+            patchDoc.ApplyTo(result.employeeToPatch, ModelState);
+
+            TryValidateModel(result.employeeToPatch);
+
+            if (!ModelState.IsValid)
+                return UnprocessableEntity(ModelState);
             serviceManager.EmployeeService.SaveChangesForPatch(result.employeeToPatch, result.employeeEntity);
             return NoContent();
         }
