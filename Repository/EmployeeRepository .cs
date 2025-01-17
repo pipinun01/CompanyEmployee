@@ -1,21 +1,22 @@
 ﻿using Contracts;
 using Entities.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Shared.RequestFeatures;
+
 
 namespace Repository
 {
     public class EmployeeRepository: RepositoryBase<Employee>, IEmployeeRepository
     {
         public EmployeeRepository(RepositoryContext context) : base(context) { }
-        public IEnumerable<Employee> GetEmployees(Guid companyId, bool trackChanges)
+        public async Task<PagedList<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
-            return FindByCondition(e=>e.CompanyId == companyId, trackChanges).ToList();
+            var employess = await FindByCondition(e=>e.CompanyId == companyId, trackChanges)
+                .OrderBy(or=>or.Name)
+                .ToListAsync();
+            return PagedList<Employee>.ToPagedList(employess, employeeParameters.pageNumber, employeeParameters.pageSize);
         }
-        public Employee GetEmployee(Guid companyId, Guid id, bool trackChanges) => FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges).SingleOrDefault();
+        public async Task<Employee> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges) => await FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
         public void CreateEmployeeForCompany(Guid companyId, Employee employee)
         {
             employee.CompanyId = companyId;

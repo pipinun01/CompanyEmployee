@@ -1,4 +1,5 @@
-﻿using Contracts;
+﻿using CompanyEmployees.Presentation.ActionFilters;
+using Contracts;
 using LoggerService;
 using Microsoft.EntityFrameworkCore;
 using Repository;
@@ -28,5 +29,6 @@ namespace CreateWebAPI.Extensions
 
         public static void ConfigureAutoMapper(this IServiceCollection services) => services.AddAutoMapper(typeof(MappingProfile));
         public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+        public static void ConfigureFilter(this IServiceCollection services) => services.AddScoped<ValidationFilterAttribute>();
     }
 }
