@@ -2,6 +2,7 @@
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.RequestFeatures;
+using Repository.Extensions;
 
 
 namespace Repository
@@ -12,9 +13,14 @@ namespace Repository
         public async Task<PagedList<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
             var employess = await FindByCondition(e=>e.CompanyId == companyId, trackChanges)
+                .FilterEmployees(employeeParameters.MinAge, employeeParameters.MaxAge)
+                .Search(employeeParameters.SearchItem)
                 .OrderBy(or=>or.Name)
+                .Skip((employeeParameters.pageNumber -1) * employeeParameters.pageSize)
+                .Take(employeeParameters.pageSize)
                 .ToListAsync();
-            return PagedList<Employee>.ToPagedList(employess, employeeParameters.pageNumber, employeeParameters.pageSize);
+            var count = await FindByCondition(e=>e.CompanyId.Equals(companyId), trackChanges).CountAsync();
+            return new PagedList<Employee>(employess, count, employeeParameters.pageNumber, employeeParameters.pageSize);
         }
         public async Task<Employee> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges) => await FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
         public void CreateEmployeeForCompany(Guid companyId, Employee employee)

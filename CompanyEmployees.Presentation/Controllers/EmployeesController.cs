@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CompanyEmployees.Presentation.Controllers
@@ -24,8 +25,10 @@ namespace CompanyEmployees.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetEmployeesForCompany(Guid companyid, [FromQuery]EmployeeParameters employeeParameters)
         {
-            var employees = await serviceManager.EmployeeService.GetEmployeesAsync(companyid, employeeParameters, false);
-            return Ok(employees);
+            var pagedResult = await serviceManager.EmployeeService.GetEmployeesAsync(companyid, employeeParameters, false);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagedResult.metada));
+            //var employees = await serviceManager.EmployeeService.GetEmployeesAsync(companyid, employeeParameters, false);
+            return Ok(pagedResult.employees);
         }
         [HttpGet("{id:guid}", Name = "GetEmployeeForCompany")]
         public async Task<IActionResult> GetEmployeeForCompany(Guid companyid, Guid id)

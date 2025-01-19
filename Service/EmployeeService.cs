@@ -20,17 +20,19 @@ namespace Service
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<IEnumerable<EmployeeDto>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+        public async Task<(IEnumerable<EmployeeDto> employees, MetaData metada)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
             //var company = await _repositoryManager.CompanyRepository.GetCompanyAsync(companyId, trackChanges);
             //if(company is null)
             //{
             //    throw new CompanyNotFoundException(companyId);
             //}
+            if(!employeeParameters.ValidAgeRange)
+                throw new MaxAgeRangeBadRequestException();
             await CheckIfCompanyExists(companyId, trackChanges);
             var employeesFromDb = await _repositoryManager.EmployeeRepository.GetEmployeesAsync(companyId, employeeParameters,  trackChanges);
             var employeeDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
-            return employeeDto;
+            return (employees: employeeDto, metada: employeesFromDb.MetaData);
         }
         public async Task<EmployeeDto> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges)
         {
