@@ -8,6 +8,7 @@ namespace Shared.RequestFeatures
 {
     public abstract class RequestParameters
     {
+        public string? Fields { get; set; }
         const int maxPageSize = 50;
         public int pageNumber { get; set; } = 1;
         private int _pageSize = 10;

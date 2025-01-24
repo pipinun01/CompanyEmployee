@@ -5,6 +5,7 @@ using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 using Shared.RequestFeatures;
+using System.Dynamic;
 
 namespace Service
 {
@@ -13,14 +14,16 @@ namespace Service
         private readonly IRepositoryManager _repositoryManager;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
+        private readonly IDataShaper<EmployeeDto> _dataShaper;
 
-        public EmployeeService(IRepositoryManager repositoryManager, ILoggerManager logger, IMapper mapper)
+        public EmployeeService(IRepositoryManager repositoryManager, ILoggerManager logger, IMapper mapper, IDataShaper<EmployeeDto> dataShaper)
         {
             _repositoryManager = repositoryManager;
             _logger = logger;
             _mapper = mapper;
+            _dataShaper = dataShaper;
         }
-        public async Task<(IEnumerable<EmployeeDto> employees, MetaData metada)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+        public async Task<(IEnumerable<ExpandoObject> employees, MetaData metada)> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
             //var company = await _repositoryManager.CompanyRepository.GetCompanyAsync(companyId, trackChanges);
             //if(company is null)
@@ -32,7 +35,8 @@ namespace Service
             await CheckIfCompanyExists(companyId, trackChanges);
             var employeesFromDb = await _repositoryManager.EmployeeRepository.GetEmployeesAsync(companyId, employeeParameters,  trackChanges);
             var employeeDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
-            return (employees: employeeDto, metada: employeesFromDb.MetaData);
+            var shapeData = _dataShaper.ShapeData(employeeDto, employeeParameters.Fields);
+            return (employees: shapeData, metada: employeesFromDb.MetaData);
         }
         public async Task<EmployeeDto> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges)
         {

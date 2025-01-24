@@ -31,6 +31,7 @@ namespace CreateWebAPI
             builder.Services.ConfigureSqlContext(builder.Configuration);
             builder.Services.ConfigureAutoMapper();
             builder.Services.ConfigureFilter();
+            builder.Services.ConfigureShadeData();
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
